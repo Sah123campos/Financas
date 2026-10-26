@@ -31,7 +31,7 @@ export function DashboardPage({ id }: { id: string }) {
   const all = useAllDatasets();
   const startEditing = query(useRoute()).get('edit') === '1';
   if (stored === undefined || !all) return <Spinner />;
-  if (stored === null || !stored) return <EmptyState title="Dashboard não encontrado" action={<Button onClick={() => navigate('/dashboards')}>Voltar aos dashboards</Button>}>Ele pode ter sido excluído.</EmptyState>;
+  if (stored === null || !stored) return <EmptyState title="Dashboard não encontrado" action={<Button onClick={() => navigate('/projetos')}>Voltar aos projetos</Button>}>Ele pode ter sido excluído.</EmptyState>;
   return <DashboardBoard key={id} dashboard={stored} datasets={all.datasets} colors={all.colors} initialEditing={startEditing} />;
 }
 
@@ -158,7 +158,7 @@ export function DashboardBoard({ dashboard: initial, datasets, colors, readOnly 
 
   const remove = async () => {
     if (await confirmDialog({ title: 'Excluir dashboard?', message: `"${d.name}" e seus gráficos serão excluídos. As planilhas de origem não são afetadas.`, danger: true, confirmLabel: 'Excluir' })) {
-      await deleteDashboard(d.id); toast('Dashboard excluído.'); navigate('/dashboards');
+      await deleteDashboard(d.id); toast('Dashboard excluído.'); navigate('/projetos');
     }
   };
 
@@ -170,7 +170,7 @@ export function DashboardBoard({ dashboard: initial, datasets, colors, readOnly 
     <div ref={boxRef} className={`${fullscreen ? 'fixed inset-0 z-40 bg-bg overflow-y-auto p-3 sm:p-5' : 'flex-1 min-w-0'}`}>
       {/* Barra superior */}
       <div className="flex flex-wrap items-start gap-2 mb-3">
-        {!readOnly && !fullscreen && <Button size="icon" variant="ghost" aria-label="Voltar" onClick={() => navigate('/dashboards')}><ArrowLeft className="h-5 w-5" /></Button>}
+        {!readOnly && !fullscreen && <Button size="icon" variant="ghost" aria-label="Voltar aos projetos" onClick={() => navigate('/projetos')}><ArrowLeft className="h-5 w-5" /></Button>}
         <div className="flex-1 min-w-[180px]">
           {editing ? (
             <>

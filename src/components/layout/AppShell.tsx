@@ -3,10 +3,11 @@ import { navigate, useRoute } from '@/state/router';
 import { useSaveState } from '@/state/saveStatus';
 import { isDark, setPrefs, usePrefs } from '@/state/prefs';
 import { openTxForm } from '@/features/finance/txFormStore';
-import { Home, Wallet, Table, LayoutDashboard, LayoutTemplate, Share2, Settings, Plus, Moon, Sun, Check, Loader2, AlertCircle, CloudOff, MoreHorizontal, ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
+import { FolderOpen, Home, Wallet, Table, LayoutDashboard, LayoutTemplate, Share2, Settings, Plus, Moon, Sun, Check, Loader2, AlertCircle, CloudOff, MoreHorizontal, ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
 
 const NAV = [
   { path: '/', label: 'Visão geral', icon: Home },
+  { path: '/projetos', label: 'Meus projetos', curto: 'Projetos', icon: FolderOpen },
   { path: '/financas', label: 'Gestão financeira', icon: Wallet },
   { path: '/planilhas', label: 'Planilhas e tabelas', icon: Table },
   { path: '/dashboards', label: 'Dashboards', icon: LayoutDashboard },
@@ -14,7 +15,14 @@ const NAV = [
   { path: '/compartilhados', label: 'Projetos compartilhados', icon: Share2 },
   { path: '/config', label: 'Configurações', icon: Settings },
 ];
-const isActive = (route: string, path: string) => (path === '/' ? route === '/' || route === '' : route === path || route.startsWith(path + '/') || route.startsWith(path + '?'));
+const nav = (path: string) => NAV.find((n) => n.path === path)!;
+// Itens que ficam no "Mais" da barra inferior do celular
+const MAIS = NAV.filter((n) => !['/', '/projetos', '/financas'].includes(n.path));
+const isActive = (route: string, path: string) => {
+  // um dashboard aberto é um projeto: destaca "Meus projetos", não "Dashboards"
+  if (route.startsWith('/dashboards/')) return path === '/projetos';
+  return path === '/' ? route === '/' || route === '' : route === path || route.startsWith(path + '/') || route.startsWith(path + '?');
+};
 
 export function AppShell({ children }: { children: ReactNode }) {
   const route = useRoute();
@@ -31,7 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <a key={n.path} href={`#${n.path}`} aria-current={active ? 'page' : undefined}
         className={compact ? `flex flex-col items-center justify-center gap-0.5 flex-1 h-14 text-[11px] ${active ? 'text-primary font-semibold' : 'text-subtle'}`
           : `flex items-center gap-3 px-3 h-10 rounded-lg text-sm font-medium transition ${active ? 'bg-primary-soft text-primary' : 'text-subtle hover:bg-muted hover:text-fg'}`}>
-        <I className="h-5 w-5 shrink-0" aria-hidden />{compact ? n.label.split(' ')[0] : n.label}
+        <I className="h-5 w-5 shrink-0" aria-hidden />{compact ? ('curto' in n ? n.curto : n.label.split(' ')[0]) : n.label}
       </a>
     );
   };
@@ -66,17 +74,17 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Navegação inferior (celular) */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-surface/95 backdrop-blur border-t border-border flex items-stretch safe-bottom" aria-label="Navegação principal">
-        {link(NAV[0], true)}{link(NAV[1], true)}
+        {link(nav('/'), true)}{link(nav('/projetos'), true)}
         <div className="flex-1 flex items-center justify-center">
           <button onClick={() => setQuick(true)} className="h-12 w-12 -mt-5 rounded-full bg-primary text-primary-fg shadow-lg inline-flex items-center justify-center active:scale-95" aria-label="Novo lançamento"><Plus className="h-6 w-6" /></button>
         </div>
-        {link(NAV[3], true)}
-        <button onClick={() => setMore(true)} className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-14 text-[11px] ${[NAV[2], ...NAV.slice(4)].some((n) => isActive(route, n.path)) ? 'text-primary font-semibold' : 'text-subtle'}`} aria-haspopup="dialog"><MoreHorizontal className="h-5 w-5" aria-hidden />Mais</button>
+        {link(nav('/financas'), true)}
+        <button onClick={() => setMore(true)} className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-14 text-[11px] ${MAIS.some((n) => isActive(route, n.path)) ? 'text-primary font-semibold' : 'text-subtle'}`} aria-haspopup="dialog"><MoreHorizontal className="h-5 w-5" aria-hidden />Mais</button>
       </nav>
 
       {more && (
         <Sheet onClose={() => setMore(false)} title="Mais opções">
-          <nav className="grid grid-cols-1 gap-1">{[NAV[2], ...NAV.slice(4)].map((n) => link(n))}</nav>
+          <nav className="grid grid-cols-1 gap-1">{MAIS.map((n) => link(n))}</nav>
         </Sheet>
       )}
       {quick && (
@@ -84,7 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="grid grid-cols-2 gap-2">
             <button className="card p-4 flex flex-col items-center gap-2 font-medium" onClick={() => { setQuick(false); openTxForm('expense'); }}><ArrowDownCircle className="h-7 w-7 text-expense" aria-hidden />Despesa</button>
             <button className="card p-4 flex flex-col items-center gap-2 font-medium" onClick={() => { setQuick(false); openTxForm('income'); }}><ArrowUpCircle className="h-7 w-7 text-income" aria-hidden />Receita</button>
-            <button className="card p-3 text-sm" onClick={() => navigate('/planilhas')}>Importar planilha</button>
+            <button className="card p-3 text-sm" onClick={() => navigate('/projetos')}>Importar planilha</button>
             <button className="card p-3 text-sm" onClick={() => navigate('/dashboards')}>Novo dashboard</button>
           </div>
         </Sheet>

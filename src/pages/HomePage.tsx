@@ -9,16 +9,19 @@ import { navigate } from '@/state/router';
 import { setPrefs, usePrefs } from '@/state/prefs';
 import { openTxForm } from '@/features/finance/txFormStore';
 import { ImportWizard } from '@/features/datasets/ImportWizard';
+import { agruparProjetos } from '@/features/projects/projects';
 import { TEMPLATES } from '@/templates/templates';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
-import { ArrowDownCircle, ArrowUpCircle, FileSpreadsheet, LayoutDashboard, Plus, Upload, Wallet, X, ShieldCheck, Sparkles, Table } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, FileSpreadsheet, FolderOpen, LayoutDashboard, Plus, Upload, Wallet, X, ShieldCheck, Sparkles, Table } from 'lucide-react';
 
 export function HomePage() {
   const prefs = usePrefs();
   const fin = useFinanceData();
-  const dashboards = useLiveQuery(() => db.dashboards.orderBy('updatedAt').reverse().limit(4).toArray(), []);
-  const datasets = useLiveQuery(() => db.datasets.orderBy('updatedAt').reverse().limit(4).toArray(), []);
+  const todosDash = useLiveQuery(() => db.dashboards.toArray(), []);
+  const todasPlan = useLiveQuery(() => db.datasets.toArray(), []);
+  const projetos = useMemo(() => (todosDash && todasPlan ? agruparProjetos(todosDash, todasPlan).projetos.slice(0, 4) : undefined), [todosDash, todasPlan]);
+  const datasets = useMemo(() => todasPlan ? [...todasPlan].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 4) : undefined, [todasPlan]);
   const [importing, setImporting] = useState(false);
   const month = useMemo(() => (fin ? summarize(fin.transactions, resolvePeriod('thisMonth')) : null), [fin]);
   const balance = fin ? balanceAt(fin.transactions, fin.accounts, todayISO()) : 0;
@@ -67,10 +70,10 @@ export function HomePage() {
 
       <div className="grid lg:grid-cols-2 gap-4">
         <section>
-          <div className="flex items-center mb-2"><h2 className="font-semibold flex-1 flex items-center gap-2"><LayoutDashboard className="h-4 w-4" aria-hidden />Dashboards recentes</h2><Button size="sm" variant="ghost" onClick={() => navigate('/dashboards')}>Ver todos</Button></div>
-          {dashboards?.length ? (
-            <ul className="card divide-y divide-border">{dashboards.map((d) => <li key={d.id}><button className="w-full text-left p-3 hover:bg-muted flex items-center gap-3" onClick={() => navigate(`/dashboards/${d.id}`)}><LayoutDashboard className="h-4 w-4 text-primary" aria-hidden /><span className="flex-1 truncate font-medium text-sm">{d.name}</span><span className="text-xs text-subtle">{d.widgets.length} gráficos</span></button></li>)}</ul>
-          ) : <EmptyBox text="Nenhum dashboard criado." action={<Button size="sm" onClick={() => navigate('/modelos')}>Usar um modelo</Button>} />}
+          <div className="flex items-center mb-2"><h2 className="font-semibold flex-1 flex items-center gap-2"><FolderOpen className="h-4 w-4" aria-hidden />Meus projetos</h2><Button size="sm" variant="ghost" onClick={() => navigate('/projetos')}>Ver todos</Button></div>
+          {projetos?.length ? (
+            <ul className="card divide-y divide-border">{projetos.map((p) => <li key={p.dashboard.id}><button className="w-full text-left p-3 hover:bg-muted flex items-center gap-3" onClick={() => navigate(`/dashboards/${p.dashboard.id}`)}><LayoutDashboard className="h-4 w-4 text-primary shrink-0" aria-hidden /><span className="flex-1 min-w-0"><span className="block truncate font-medium text-sm">{p.dashboard.name}</span>{p.planilhas.some((pl) => pl.name !== p.dashboard.name) && <span className="block truncate text-xs text-subtle">{p.planilhas.map((pl) => pl.name).join(', ')}</span>}</span><span className="text-xs text-subtle shrink-0">{p.dashboard.widgets.length} gráficos</span></button></li>)}</ul>
+          ) : <EmptyBox text="Nenhum projeto ainda. Importe uma planilha para criar o primeiro." action={<Button size="sm" onClick={() => setImporting(true)}>Importar planilha</Button>} />}
         </section>
         <section>
           <div className="flex items-center mb-2"><h2 className="font-semibold flex-1 flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" aria-hidden />Planilhas importadas</h2><Button size="sm" variant="ghost" onClick={() => navigate('/planilhas')}>Ver todas</Button></div>

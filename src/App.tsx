@@ -13,6 +13,7 @@ const FinancePage = lazy(() => import('@/pages/FinancePage').then((m) => ({ defa
 const DatasetsPage = lazy(() => import('@/pages/DatasetsPage').then((m) => ({ default: m.DatasetsPage })));
 const DatasetEditorPage = lazy(() => import('@/features/datasets/DatasetEditor').then((m) => ({ default: m.DatasetEditorPage })));
 const NewDatasetPage = lazy(() => import('@/features/datasets/DatasetEditor').then((m) => ({ default: m.NewDatasetPage })));
+const ProjectsPage = lazy(() => import('@/pages/ProjectsPage').then((m) => ({ default: m.ProjectsPage })));
 const DashboardsPage = lazy(() => import('@/pages/DashboardsPage').then((m) => ({ default: m.DashboardsPage })));
 const DashboardPage = lazy(() => import('@/features/dashboards/DashboardPage').then((m) => ({ default: m.DashboardPage })));
 const TemplatesPage = lazy(() => import('@/pages/TemplatesPage').then((m) => ({ default: m.TemplatesPage })));
@@ -26,6 +27,7 @@ function Routes() {
   let p: Record<string, string> | null;
   if (path === '/' || path === '') return <HomePage />;
   if ((p = match('/s/:payload', path))) return <SharedView payload={route.slice(3)} />;
+  if (path === '/projetos') return <ProjectsPage />;
   if (path === '/financas') return <FinancePage />;
   if ((p = match('/financas/:tab', path))) return <FinancePage tab={p.tab} />;
   if (path === '/planilhas') return <DatasetsPage />;
