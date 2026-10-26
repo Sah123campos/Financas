@@ -3,6 +3,7 @@ import { navigate, useRoute } from '@/state/router';
 import { useSaveState } from '@/state/saveStatus';
 import { isDark, setPrefs, usePrefs } from '@/state/prefs';
 import { openTxForm } from '@/features/finance/txFormStore';
+import { InstallButton } from '@/components/InstallApp';
 import { FolderOpen, Home, Wallet, Table, LayoutDashboard, LayoutTemplate, Share2, Settings, Plus, Moon, Sun, Check, Loader2, AlertCircle, CloudOff, MoreHorizontal, ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
 
 const NAV = [
@@ -65,6 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex-1" />
         {!online && <span className="chip text-warn border-warn/40" title="Sem conexão: tudo continua funcionando localmente; apenas abrir links externos exige internet."><CloudOff className="h-3.5 w-3.5" aria-hidden />Offline</span>}
         <SaveIndicator />
+        <InstallButton onHelp={() => { navigate('/config'); setTimeout(() => document.getElementById('instalar')?.scrollIntoView({ behavior: 'smooth' }), 150); }} />
         <button className="h-9 w-9 rounded-lg hover:bg-muted inline-flex items-center justify-center" onClick={() => setPrefs({ theme: isDark() ? 'light' : 'dark' })} aria-label={isDark() ? 'Usar tema claro' : 'Usar tema escuro'} title="Alternar tema">
           {isDark() ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>

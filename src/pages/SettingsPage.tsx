@@ -8,6 +8,7 @@ import { PageHeader, Segmented } from '@/components/ui/misc';
 import { Button } from '@/components/ui/Button';
 import { confirmDialog } from '@/components/ui/confirm';
 import { toast } from '@/state/toast';
+import { InstallSection } from '@/components/InstallApp';
 import { AlertTriangle, Database, Download, HardDrive, Moon, Monitor, Sun, Upload, Trash2 } from 'lucide-react';
 
 const CURRENCIES = [['BRL', 'Real (R$)'], ['USD', 'Dólar americano (US$)'], ['EUR', 'Euro (€)'], ['GBP', 'Libra (£)'], ['ARS', 'Peso argentino'], ['CLP', 'Peso chileno'], ['MXN', 'Peso mexicano'], ['JPY', 'Iene']];
@@ -63,6 +64,7 @@ export function SettingsPage() {
         <label className="flex items-center gap-3 text-sm"><input type="checkbox" checked={prefs.reducedMotion} onChange={(e) => setPrefs({ reducedMotion: e.target.checked })} />Reduzir animações e movimentos</label>
         <label className="flex flex-wrap items-center gap-3 text-sm"><span className="w-32">Seu nome</span><input className="input max-w-xs" value={prefs.userName} onChange={(e) => setPrefs({ userName: e.target.value })} placeholder="Opcional" /></label>
       </section>
+      <InstallSection />
       <section className="card p-4 space-y-3">
         <h2 className="font-semibold">Moeda e região</h2>
         <div className="grid sm:grid-cols-2 gap-3">
@@ -92,7 +94,7 @@ export function SettingsPage() {
       </section>
       <section className="card p-4 text-sm text-subtle space-y-1">
         <h2 className="font-semibold text-fg">Sobre</h2>
-        <p>Painel Finanças funciona offline depois do primeiro acesso e pode ser instalado como aplicativo (menu do navegador → “Instalar” ou “Adicionar à tela inicial”).</p>
+        <p>Painel Finanças funciona offline depois do primeiro acesso e pode ser instalado como aplicativo no celular e no computador (veja “Instalar como aplicativo” acima).</p>
         <p>Nenhum dado é enviado a servidores. O compartilhamento usa links que carregam uma cópia dos dados no próprio endereço, ou arquivos JSON.</p>
       </section>
     </div>

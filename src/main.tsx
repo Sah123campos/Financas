@@ -5,6 +5,7 @@ import './index.css';
 import { applyTheme } from '@/state/prefs';
 import { ensureSeed, syncRecurring } from '@/db/repo';
 import { toast } from '@/state/toast';
+import '@/state/install'; // captura o convite de instalação o quanto antes
 
 applyTheme();
 

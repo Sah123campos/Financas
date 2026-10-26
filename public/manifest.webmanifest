@@ -2,6 +2,7 @@
   "name": "Painel Finanças",
   "short_name": "Finanças",
   "description": "Gestão financeira, planilhas e dashboards interativos.",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
