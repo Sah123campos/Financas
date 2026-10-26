@@ -11,6 +11,7 @@ import { WidgetView, type Selection } from './WidgetView';
 import { ChartEditor } from './ChartEditor';
 import { RecordsModal } from './RecordsModal';
 import { FilterEditor, describeFilter } from './FilterEditor';
+import { DataPanel } from './DataPanel';
 import { ShareDialog } from '@/features/share/ShareDialog';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -21,7 +22,7 @@ import { toast } from '@/state/toast';
 import { makeWidget } from '@/templates/layout';
 import { PERIOD_PRESETS, previousPeriod, resolvePeriod } from '@/lib/dates';
 import { uid } from '@/lib/id';
-import { ArrowLeft, Copy, Eye, Filter as FilterIcon, Maximize2, Minimize2, MoreHorizontal, Pencil, Plus, RotateCcw, Share2, Trash2, X, LayoutDashboard } from 'lucide-react';
+import { ArrowLeft, Copy, Database, Eye, Filter as FilterIcon, Maximize2, Minimize2, MoreHorizontal, Pencil, Plus, RotateCcw, Share2, Trash2, X, LayoutDashboard } from 'lucide-react';
 
 const Grid = WidthProvider(Responsive);
 
@@ -46,6 +47,9 @@ export function DashboardBoard({ dashboard: initial, datasets, colors, readOnly 
   const [shareOpen, setShareOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [periodPreset, setPeriodPreset] = useState<string>('');
+  const [dataOpen, setDataOpen] = useState(() => { try { return !readOnly && localStorage.getItem('pf.dataPanelOpen') === '1'; } catch { return false; } });
+  const [bp, setBp] = useState('lg');
+  const toggleData = (open: boolean) => { setDataOpen(open); try { localStorage.setItem('pf.dataPanelOpen', open ? '1' : '0'); } catch { /* ignora */ } };
   const boxRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number>();
 
@@ -104,6 +108,16 @@ export function DashboardBoard({ dashboard: initial, datasets, colors, readOnly 
     void cur;
     if (changed) persist({ ...d, widgets });
   };
+  // Redimensionar pelo canto funciona também no modo apresentação.
+  // No computador salva a posição de todos; em telas menores, só a nova altura do gráfico.
+  const onResizeStop = (cur: Layout[], _old: Layout, item: Layout) => {
+    if (readOnly) return;
+    if (bp === 'lg') {
+      persist({ ...d, widgets: d.widgets.map((w) => { const l = cur.find((x) => x.i === w.id); return l ? { ...w, layout: { x: l.x, y: l.y, w: l.w, h: l.h } } : w; }) }, true);
+    } else {
+      persist({ ...d, widgets: d.widgets.map((w) => (w.id === item.i && !(bp === 'sm' && w.type === 'kpi') ? { ...w, layout: { ...w.layout, h: item.h } } : w)) }, true);
+    }
+  };
 
   // ----- widgets -----
   const newWidget = () => {
@@ -150,8 +164,10 @@ export function DashboardBoard({ dashboard: initial, datasets, colors, readOnly 
 
   const activeFilterCount = d.filters.length + selections.length;
 
+  const showData = dataOpen && !readOnly && !fullscreen;
   return (
-    <div ref={boxRef} className={`${fullscreen ? 'fixed inset-0 z-40 bg-bg overflow-y-auto p-3 sm:p-5' : ''}`}>
+    <div className={showData ? 'lg:flex lg:items-start lg:gap-1' : ''}>
+    <div ref={boxRef} className={`${fullscreen ? 'fixed inset-0 z-40 bg-bg overflow-y-auto p-3 sm:p-5' : 'flex-1 min-w-0'}`}>
       {/* Barra superior */}
       <div className="flex flex-wrap items-start gap-2 mb-3">
         {!readOnly && !fullscreen && <Button size="icon" variant="ghost" aria-label="Voltar" onClick={() => navigate('/dashboards')}><ArrowLeft className="h-5 w-5" /></Button>}
@@ -174,6 +190,7 @@ export function DashboardBoard({ dashboard: initial, datasets, colors, readOnly 
               options={[{ value: 'view', label: <><Eye className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">Apresentação</span></> }, { value: 'edit', label: <><Pencil className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">Edição</span></> }]} />
           )}
           {editing && <Button variant="primary" icon={<Plus className="h-4 w-4" />} onClick={newWidget}>Gráfico</Button>}
+          {!readOnly && <Button icon={<Database className="h-4 w-4" />} aria-pressed={dataOpen} variant={dataOpen ? 'primary' : 'secondary'} onClick={() => toggleData(!dataOpen)} title="Ver e atualizar os dados dos gráficos"><span className="hidden sm:inline">Dados</span></Button>}
           {!readOnly && <Button icon={<Share2 className="h-4 w-4" />} onClick={() => setShareOpen(true)}><span className="hidden sm:inline">Compartilhar</span></Button>}
           {readOnly && onImport && <Button variant="primary" icon={<Copy className="h-4 w-4" />} onClick={onImport}>Importar uma cópia</Button>}
           <Button size="icon" aria-label={fullscreen ? 'Sair da tela cheia' : 'Tela cheia'} onClick={toggleFullscreen}>{fullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}</Button>
@@ -222,7 +239,7 @@ export function DashboardBoard({ dashboard: initial, datasets, colors, readOnly 
         </EmptyState>
       ) : (
         <Grid className="-mx-2" layouts={layouts} breakpoints={{ lg: 1024, md: 640, sm: 0 }} cols={{ lg: 12, md: 6, sm: 1 }} rowHeight={42} margin={[12, 12]}
-          isDraggable={editing} isResizable={editing} draggableHandle=".drag-handle" onLayoutChange={onLayoutChange} compactType="vertical" useCSSTransforms>
+          isDraggable={editing} isResizable={!readOnly} resizeHandles={['se']} draggableHandle=".drag-handle" onLayoutChange={onLayoutChange} onResizeStop={onResizeStop} onBreakpointChange={(b) => setBp(b)} compactType="vertical" useCSSTransforms>
           {d.widgets.map((w) => (
             <div key={w.id}>
               <WidgetView widget={w} dataset={dsMap.get(w.datasetId)} externalFilters={externalFor(w.id)} selection={selections.find((s) => s.widgetId === w.id)}
@@ -233,7 +250,7 @@ export function DashboardBoard({ dashboard: initial, datasets, colors, readOnly 
           ))}
         </Grid>
       )}
-      {editing && d.widgets.length > 0 && <p className="text-xs text-subtle mt-2 hidden lg:block">Dica: arraste pelo ícone ⋮⋮ para mover e pelo canto inferior direito para redimensionar. Em telas menores, os gráficos se reorganizam automaticamente.</p>}
+      {!readOnly && d.widgets.length > 0 && <p className="text-xs text-subtle mt-2">Dica: arraste o canto inferior direito de um gráfico para deixá-lo maior ou menor.{editing ? ' Arraste pelo ícone ⋮⋮ para mover.' : ''} Use “Dados” para atualizar os valores.</p>}
 
       {editor && <ChartEditor open onClose={() => setEditor(null)} initial={editor} datasets={datasets} onSave={saveWidget} colorOverrides={colors} />}
       {records && <RecordsModal open onClose={() => setRecords(null)} title={records.title} rows={records.rows} columns={records.ds.columns} />}
@@ -242,6 +259,8 @@ export function DashboardBoard({ dashboard: initial, datasets, colors, readOnly 
         <FilterEditor filters={d.filters} onChange={(filters) => persist({ ...d, filters })} columns={unionCols} rows={unionRows} />
       </Modal>
       {shareOpen && <ShareDialog open onClose={() => setShareOpen(false)} dashboard={d} datasets={datasets} />}
+    </div>
+    {showData && <DataPanel datasets={usedDatasets} onClose={() => toggleData(false)} />}
     </div>
   );
 }

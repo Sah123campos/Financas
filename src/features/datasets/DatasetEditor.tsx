@@ -43,7 +43,8 @@ export function NewDatasetPage() {
   return <Spinner label="Criando planilha…" />;
 }
 
-function DatasetEditor({ dataset }: { dataset: Dataset }) {
+/** `embedded`: versão compacta usada no painel de dados ao lado do dashboard. */
+export function DatasetEditor({ dataset, embedded = false }: { dataset: Dataset; embedded?: boolean }) {
   const h = useHistory<Doc>({ name: dataset.name, columns: dataset.columns, rows: dataset.rows });
   const { state: doc } = h;
   const [q, setQ] = useState('');
@@ -162,17 +163,17 @@ function DatasetEditor({ dataset }: { dataset: Dataset }) {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 mb-3">
-        <Button size="icon" variant="ghost" aria-label="Voltar" onClick={() => navigate('/planilhas')}><ArrowLeft className="h-5 w-5" /></Button>
-        <input className="input h-10 font-semibold text-lg flex-1 min-w-[180px] max-w-md" value={doc.name} onChange={(e) => h.set((d) => ({ ...d, name: e.target.value }))} aria-label="Nome da planilha" />
+        {!embedded && <Button size="icon" variant="ghost" aria-label="Voltar" onClick={() => navigate('/planilhas')}><ArrowLeft className="h-5 w-5" /></Button>}
+        <input className={`input font-semibold ${embedded ? 'h-9 text-base' : 'h-10 text-lg'} flex-1 min-w-[160px] max-w-md`} value={doc.name} onChange={(e) => h.set((d) => ({ ...d, name: e.target.value }))} aria-label="Nome da planilha" />
         <div className="flex flex-wrap gap-2 ml-auto">
           <Button size="icon" aria-label="Desfazer (Ctrl+Z)" title="Desfazer (Ctrl+Z)" disabled={!h.canUndo} onClick={h.undo}><Undo2 className="h-4 w-4" /></Button>
           <Button size="icon" aria-label="Refazer (Ctrl+Y)" title="Refazer (Ctrl+Y)" disabled={!h.canRedo} onClick={h.redo}><Redo2 className="h-4 w-4" /></Button>
-          <Button icon={<LayoutDashboard className="h-4 w-4" />} onClick={makeDashboard}><span className="hidden sm:inline">Criar dashboard</span></Button>
+          {!embedded && <Button icon={<LayoutDashboard className="h-4 w-4" />} onClick={makeDashboard}><span className="hidden sm:inline">Criar dashboard</span></Button>}
           <Menu label="Exportar e mais" triggerClass="h-10 w-10 border border-border bg-surface" trigger={<MoreVertical className="h-4 w-4" />}>
             <MenuItem icon={<Download className="h-4 w-4" />} onClick={() => exportAs('xlsx')}>Exportar Excel (.xlsx)</MenuItem>
             <MenuItem icon={<Download className="h-4 w-4" />} onClick={() => exportAs('csv')}>Exportar CSV</MenuItem>
             <MenuItem icon={<Download className="h-4 w-4" />} onClick={() => exportAs('json')}>Exportar JSON</MenuItem>
-            <MenuItem icon={<Trash2 className="h-4 w-4" />} danger onClick={removeDataset}>Excluir planilha</MenuItem>
+            {!embedded && <MenuItem icon={<Trash2 className="h-4 w-4" />} danger onClick={removeDataset}>Excluir planilha</MenuItem>}
           </Menu>
         </div>
       </div>
@@ -215,7 +216,7 @@ function DatasetEditor({ dataset }: { dataset: Dataset }) {
           ))}
         </ul>
       ) : (
-        <div className="card overflow-auto scrollbar-thin max-h-[calc(100dvh-260px)]">
+        <div className={`card overflow-auto scrollbar-thin ${embedded ? '' : 'max-h-[calc(100dvh-260px)]'}`}>
           <table className="text-sm tabular border-collapse min-w-full">
             <thead className="sticky top-0 z-10 bg-muted">
               <tr>
