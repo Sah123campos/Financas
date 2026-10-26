@@ -3,7 +3,7 @@ name: Publicar no GitHub Pages
 
 on:
   push:
-    branches: [main, claude/financial-dashboard-platform-qfb1ld]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

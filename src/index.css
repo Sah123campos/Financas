@@ -62,6 +62,13 @@ body { @apply bg-bg text-fg antialiased; font-feature-settings: 'cv11'; -webkit-
 .react-grid-item.react-grid-placeholder { background: rgb(var(--primary)); opacity: .15; border-radius: 12px; }
 .react-grid-item > .react-resizable-handle { position: absolute; width: 22px; height: 22px; bottom: 2px; right: 2px; cursor: se-resize; }
 .react-grid-item > .react-resizable-handle::after { content: ''; position: absolute; right: 5px; bottom: 5px; width: 8px; height: 8px; border-right: 2px solid rgb(var(--subtle)); border-bottom: 2px solid rgb(var(--subtle)); }
+.react-grid-item > .react-resizable-handle { z-index: 5; touch-action: none; }
+.react-grid-item > .react-resizable-handle::after { transition: border-color .15s; }
+.react-grid-item:hover > .react-resizable-handle::after, .react-grid-item.resizing > .react-resizable-handle::after { border-color: rgb(var(--primary)); }
+@media (pointer: coarse) {
+  .react-grid-item > .react-resizable-handle { width: 34px; height: 34px; }
+  .react-grid-item > .react-resizable-handle::after { width: 12px; height: 12px; right: 7px; bottom: 7px; }
+}
 .react-grid-item.react-draggable-dragging { z-index: 20; }
 .react-grid-item.cssTransforms { transition-property: transform, width, height; }
 
