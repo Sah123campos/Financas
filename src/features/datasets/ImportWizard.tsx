@@ -13,7 +13,8 @@ import { navigate } from '@/state/router';
 import { uid } from '@/lib/id';
 import { todayISO } from '@/lib/dates';
 import { useFinanceData } from '@/finance/financeDataset';
-import { buildWidgets } from '@/templates/layout';
+import { criarProjeto } from '@/features/projects/projects';
+import { toast } from '@/state/toast';
 import { AlertTriangle, CheckCircle2, ClipboardPaste, FileSpreadsheet, Sparkles, Table, Upload, Wallet } from 'lucide-react';
 
 type Step = 'source' | 'columns' | 'target' | 'done';
@@ -72,7 +73,10 @@ export function ImportWizard({ open, onClose, defaultTarget = 'dataset' }: { ope
     try {
       const ds = buildDataset(sheet!, plan, name.trim() || 'Planilha importada', `Arquivo: ${raw!.fileName}${raw!.sheets.length > 1 ? ` · aba ${sheet!.name}` : ''}`);
       await saveDataset(ds);
-      setResult({ ds }); setStep('done');
+      // A planilha importada já vira um projeto: dashboard sugerido criado e aberto na hora.
+      const d = await criarProjeto(ds);
+      close(); navigate(`/dashboards/${d.id}`);
+      toast(`Projeto "${d.name}" criado. Ele fica em Meus projetos.`, 'success', { label: 'Ver projetos', run: () => navigate('/projetos') });
     } catch (e) { setError((e as Error).message); } finally { setLoading(false); }
   };
 
@@ -135,11 +139,7 @@ export function ImportWizard({ open, onClose, defaultTarget = 'dataset' }: { ope
 
   const createSuggested = async () => {
     const ds = result?.ds; if (!ds) return;
-    const sugg = suggestCharts(ds).slice(0, 6);
-    const widgets = buildWidgets(ds.id, sugg.map((s) => [s.type, s.title, s.config, s.type === 'kpi' ? [3, 3] : [6, 7]]));
-    const now = Date.now();
-    const d = { id: uid('db'), name: `Análise: ${ds.name}`, description: 'Criado automaticamente a partir das sugestões.', widgets, filters: [], createdAt: now, updatedAt: now };
-    await tracked(() => db.dashboards.put(d));
+    const d = await criarProjeto(ds);
     close(); navigate(`/dashboards/${d.id}`);
   };
 
@@ -150,7 +150,7 @@ export function ImportWizard({ open, onClose, defaultTarget = 'dataset' }: { ope
       description={step === 'source' ? 'Excel (XLSX/XLS/ODS), CSV, JSON ou dados colados de outra planilha. Tudo é processado no seu navegador.' : undefined}
       footer={
         step === 'columns' ? <><Button onClick={reset}>Voltar</Button><Button variant="primary" disabled={!plan.some((p) => p.include)} onClick={toTarget}>Continuar</Button></>
-        : step === 'target' ? <><Button onClick={() => setStep('columns')}>Voltar</Button>{target === 'dataset' && <Button variant="primary" loading={loading} onClick={confirmDataset}>Confirmar importação</Button>}</>
+        : step === 'target' ? <><Button onClick={() => setStep('columns')}>Voltar</Button>{target === 'dataset' && <Button variant="primary" loading={loading} onClick={confirmDataset}>Importar e abrir projeto</Button>}</>
         : step === 'done' ? <><Button onClick={close}>Fechar</Button>{result?.ds ? <><Button onClick={() => { close(); navigate(`/planilhas/${result.ds!.id}`); }}>Abrir planilha</Button><Button variant="primary" icon={<Sparkles className="h-4 w-4" />} onClick={createSuggested}>Criar dashboard sugerido</Button></> : <Button variant="primary" onClick={() => { close(); navigate('/financas/lancamentos'); }}>Ver lançamentos</Button>}</>
         : <Button onClick={close}>Cancelar</Button>
       }>
