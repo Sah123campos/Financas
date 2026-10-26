@@ -1,7 +1,7 @@
 // Service worker: guarda os arquivos do app para funcionar offline.
 // Navegação: rede primeiro (com fallback ao cache). Arquivos estáticos: cache primeiro.
-const CACHE = 'painel-financas-v1';
-const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+const CACHE = 'painel-financas-v2';
+const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg', './favicon.ico', './favicon-32.png', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
