@@ -19,6 +19,7 @@ O build é estático (`base: './'`) e pode ser publicado em qualquer hospedagem 
 
 | Área | Recursos |
 |---|---|
+| **Meus projetos** | Ao importar uma planilha, o projeto (planilha + dashboard com gráficos sugeridos) é criado e aberto na hora. A página **Meus projetos** (menu e tela inicial) lista todos os projetos salvos no aparelho, com busca, renomear, excluir e as planilhas que ainda não têm projeto. |
 | **Visão geral** | Boas-vindas para iniciantes, atalhos, resumo financeiro do mês, dashboards e planilhas recentes, modelos. |
 | **Gestão financeira** | Formulário rápido (só o valor é obrigatório), categorias com cor/ícone, contas/carteiras, situação (pago/recebido/pendente/previsto), recorrências e parcelamentos sem duplicação, orçamentos com alertas (80% e 100%), metas (economia mensal, compra, reserva), saldo atual, comparação com o período anterior, despesas ÷ receitas, “quanto posso gastar”, projeção de saldo, pendências e atrasos, comparativo com o mês anterior, importação de extrato. |
 | **Planilhas** | Importação de XLSX/XLS/ODS, CSV/TSV (detecta UTF-8/Windows-1252), JSON e dados colados; escolha de aba e colunas; detecção de cabeçalhos e tipos (número, moeda, %, data, sim/não, texto) com formato brasileiro; relatório de vazios e valores inválidos (nada é descartado em silêncio); editor com ordenação, filtros, pesquisa, seleção múltipla, duplicação, desfazer/refazer, salvamento automático, exportação XLSX/CSV/JSON. |
