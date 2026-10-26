@@ -1,0 +1,12 @@
+{
+  "name": "Painel Finanças",
+  "short_name": "Finanças",
+  "description": "Gestão financeira, planilhas e dashboards interativos.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1e3a8a",
+  "lang": "pt-BR",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
