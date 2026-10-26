@@ -3,10 +3,10 @@ import { Download, Share, PlusSquare, MoreVertical, MonitorDown, CheckCircle2 } 
 import { promptInstall, useInstall } from '@/state/install';
 import { Button } from '@/components/ui/Button';
 
-/** Botão do cabeçalho: aparece só quando dá para instalar (Chrome/Edge/Android) ou no iPhone. */
+/** Botão do cabeçalho: some só quando o app já está instalado. Sem convite do navegador, leva ao passo a passo. */
 export function InstallButton({ onHelp }: { onHelp: () => void }) {
   const st = useInstall();
-  if (st === 'installed' || st === 'manual') return null;
+  if (st === 'installed') return null;
   return (
     <button onClick={() => (st === 'available' ? promptInstall() : onHelp())}
       className="h-9 px-3 rounded-lg bg-primary-soft text-primary text-sm font-medium inline-flex items-center gap-1.5 hover:brightness-95"
@@ -60,6 +60,7 @@ export function InstallSteps() {
           <li>Clique no ícone <MonitorDown className="inline h-3.5 w-3.5" aria-hidden /> na barra de endereço, ou no menu → <b>Instalar Painel Finanças</b>.</li>
           <li>O atalho aparece na área de trabalho e no menu Iniciar.</li>
         </ol>
+        <p className="text-xs text-subtle pt-1">Opera, Firefox e Safari no Mac não instalam sites como app: abra o endereço no Chrome ou no Edge para instalar.</p>
       </div>
     </div>
   );
